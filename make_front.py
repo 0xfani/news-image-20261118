@@ -3,6 +3,7 @@
 # illustrations (art/*.jpg, made with ChatGPT image generation), a world map
 # with numbered pins, an "Also on" list, a date-check box and a sources footer.
 # Run: uv run --with pillow python make_front.py
+import gzip
 import json
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
@@ -192,7 +193,7 @@ def card(img, d, x, y, w, ih, n, story, art, hl_size, det_size, lead=False):
 
 def world_map(img, d, x, y, w, h):
     rect(d, (x, y, x + w, y + h), fill=(214, 230, 240))
-    land = json.loads((ART / "land110.geojson").read_text(encoding="utf8"))
+    land = json.loads(gzip.decompress((ART / "land110.geojson.gz").read_bytes()))
     lat_top, lat_bot = 80, -58
 
     def pt(lon, lat):
