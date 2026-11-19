@@ -23,34 +23,34 @@ INK, PAPER, MUTED, RED = (22, 22, 22), (250, 246, 236), (88, 84, 76), (190, 30, 
 
 # (region, tag, headline, detail, lon, lat) - every item first reported on 18 Nov 2026
 LEADS = [
-    ("Asia", "ASIA \u00b7 APEC, CHINA", "Trump, Xi and Putin shake hands at APEC in Shenzhen",
-     "Xi met Trump on the tarmac; Putin flew in with nuclear-capable bombers.", 114.1, 22.5),
+    ("Asia", "ASIA \u00b7 APEC, CHINA", "Xi greets Trump as APEC opens in Shenzhen",
+     "Trump and Putin also shook hands; their talks follow on Thursday.", 114.1, 22.5),
     ("Middle East", "MIDDLE EAST \u00b7 IRAN WAR", "US strikes Qeshm; Iran fires at Kuwait and Bahrain",
-     "Iran fired missiles and drones at Gulf states as peace talks faltered.", 55.9, 26.8),
+     "Gulf states faced new missile and drone attacks as peace talks faltered.", 55.9, 26.8),
     ("Middle East", "MIDDLE EAST \u00b7 GAZA", "Israel launches ground operation in central Gaza",
      "Tanks crossed the truce's Yellow Line; families fled their shelters.", 34.4, 31.4),
 ]
 CARDS = [
     ("Americas", "US \u00b7 MARKETS", "Anthropic prices its IPO at $83 a share",
-     "Above the expected range, ahead of its stock-market debut.", -74.0, 40.7),
+     "Above the expected range, before its market debut.", -74.0, 40.7),
     ("World", "WORLD \u00b7 SPACE", "Voyager 1 is one light-day from Earth",
-     "25.9 billion km away, 49 years after its launch.", -118.2, 34.2),
+     "25.9 billion km away, 49 years after launch.", -118.2, 34.2),
     ("World", "WORLD \u00b7 GAMES", "GTA VI launches to rave reviews",
-     "PlayStation's network faltered hours before the release.", None, None),
-    ("World", "WORLD \u00b7 HEALTH", "WHO sounds the alarm on antibiotic resistance",
-     "Drug-resistant infections are spreading, the agency warns.", 6.1, 46.2),
-    ("Americas", "US \u00b7 POLITICS", "Democrats pick Jeffries to be first Black Speaker",
-     "House Democrats nominated Hakeem Jeffries for the job.", -77.0, 38.9),
+     "PlayStation's network faltered hours before.", None, None),
+    ("World", "WORLD \u00b7 HEALTH", "WHO sounds alarm on antibiotic resistance",
+     "Drug-resistant infections are spreading.", 6.1, 46.2),
+    ("Americas", "US \u00b7 POLITICS", "Democrats nominate Jeffries for Speaker",
+     "He would be the first Black Speaker of the House.", -77.0, 38.9),
     ("Europe", "EUROPE \u00b7 UKRAINE", "EU proposes a \u20ac45bn loan for Ukraine",
-     "Money for 2027 to avert a cash crisis and boost defences.", 4.4, 50.8),
+     "For 2027, to avert a cash crisis and boost defence.", 4.4, 50.8),
     ("Asia", "ASIA \u00b7 LABOUR", "Bangladesh police clash with garment workers",
-     "Workers are demanding a higher minimum wage.", 90.4, 23.8),
+     "Workers demand a higher minimum wage.", 90.4, 23.8),
     ("Americas", "AMERICAS \u00b7 DEFENCE", "Hegseth signs military deal in Caracas",
-     "A surprise visit to Venezuela opens military cooperation.", -66.9, 10.5),
+     "A surprise visit opens US-Venezuela cooperation.", -66.9, 10.5),
     ("World", "WORLD \u00b7 CLIMATE", "Fossil-fuel exit splits the COP31 talks",
-     "OPEC defends oil and gas in Antalya; four more European states join the exit push.", 30.7, 36.9),
+     "OPEC defends oil; four more European states back an exit.", 30.7, 36.9),
     ("Europe", "EUROPE \u00b7 UKRAINE WAR", "Russian strikes kill four in Odesa",
-     "Russian strikes hit Ukraine's Black Sea port city overnight.", 30.7, 46.5),
+     "Ukraine's Black Sea port city was hit.", 30.7, 46.5),
 ]
 # (region, place, text, lon, lat)
 BRIEFS = [
@@ -89,9 +89,9 @@ FIELDS = [("War & security", 11), ("Politics & diplomacy", 10), ("Economy & busi
 NUMBERS = [("$83", "Anthropic IPO price"), ("\u20ac45bn", "EU loan plan for Ukraine"),
            ("3.6%", "UK inflation"), ("25.9bn km", "Voyager 1 from Earth"),
            ("4", "killed in Odesa"), ("12 yrs", "since Iraq last piped oil to Turkey")]
-DATE_CHECK = ("Left out on purpose because they were first reported on 17 Nov, not today: "
-              "Ukraine's strike on the Kerch bridge, Nvidia's doubled revenue and Jensen Huang's exit, "
-              "the US losing its measles-free status, California's Waymo freeway ban and Trump's arrival in Manila.")
+DATE_HEAD = "CHECKED: ALL 42 STORIES ARE FROM 18 NOVEMBER"
+DATE_CHECK = ("Older news is left off this page. The Kerch bridge strike, Nvidia's CEO exit and the US "
+              "losing its measles-free status were first reported on 17 November, so they are not shown here.")
 
 
 def font(name, size):
@@ -145,14 +145,10 @@ def bands(im, axis, min_len):
 
 
 def load_art():
-    """3 lead pictures, then 10 card pictures in card order."""
-    leads = [Image.open(ART / f"{n}.jpg").convert("RGB") for n in ("lead1_apec", "lead2_gulf", "lead3_gaza")]
-    cards = [Image.open(ART / f"{n}.jpg").convert("RGB")
-             for n in ("card04_ipo", "card05_voyager", "card06_gta", "card07_lab", "card08_capitol")]
-    sheet = Image.open(ART / "cards09_13_sheet.jpg").convert("RGB")
-    for band in bands(sheet, 0, 150):          # two rows of two, then one wide panel
-        cards += bands(band, 1, 150)
-    assert len(cards) == 10, len(cards)
+    """3 lead pictures (art/L1-L3.jpg), then 10 card pictures (art/C4-C13.jpg) in card order.
+    All are flat-vector ChatGPT illustrations: bright and readable at thumbnail size."""
+    leads = [Image.open(ART / f"L{i}.jpg").convert("RGB") for i in range(1, 4)]
+    cards = [Image.open(ART / f"C{i}.jpg").convert("RGB") for i in range(4, 14)]
     return leads, cards
 
 
@@ -181,14 +177,18 @@ def card(img, d, x, y, w, ih, n, story, art, hl_size, det_size, lead=False):
     text(d, (x + 4, ty + 5.8), tag, tf, (255, 255, 255), "lm")
     hf = font(SERIF_B, hl_size)
     ly = ty + 14
-    for line in wrap(d, head, hf, w)[:2]:
+    head_lines, det_lines = wrap(d, head, hf, w), wrap(d, detail, font(SANS, det_size), w)
+    if len(head_lines) > 2 or len(det_lines) > 2:   # never cut words off silently
+        raise SystemExit(f"card {n} text too long: {head_lines} {det_lines}")
+    for line in head_lines:
         text(d, (x, ly), line, hf)
         ly += hl_size * 1.12
     df = font(SANS, det_size)
     ly += 1.5
-    for line in wrap(d, detail, df, w)[:2]:
+    for line in det_lines:
         text(d, (x, ly), line, df, MUTED)
         ly += det_size * 1.25
+    return ly
 
 
 def world_map(img, d, x, y, w, h):
@@ -278,11 +278,13 @@ def main():
     gap = 8
     lw = (W - 2 * M - 2 * gap) / 3
     for i, st in enumerate(LEADS):
-        card(img, d, M + i * (lw + gap), 145, lw, 128, i + 1, st, leads_art[i], 17.5, 9.6, lead=True)
+        end = card(img, d, M + i * (lw + gap), 145, lw, 128, i + 1, st, leads_art[i], 17.5, 10.2, lead=True)
+        if end > 350:   # the card row below starts at y = 352
+            raise SystemExit(f"lead {i + 1} text runs into the card row (ends at y {end:.0f})")
     cw = (W - 2 * M - 4 * gap) / 5
     for i, st in enumerate(CARDS):
         row, col = divmod(i, 5)
-        card(img, d, M + col * (cw + gap), 352 + row * 160, cw, 78, i + 4, st, cards_art[i], 12.6, 8.4)
+        card(img, d, M + col * (cw + gap), 352 + row * 160, cw, 78, i + 4, st, cards_art[i], 13.0, 9.2)
     # bottom: map + date check (left), also-on list (right)
     by = 676
     rect(d, (M, by, W - M, by + 1.2), fill=INK)
@@ -297,12 +299,16 @@ def main():
         text(d, (lx + 9, ly - 0.5), lab, font(SANS, 7.6))
         lx += 12 + d.textlength(lab, font=font(SANS, 7.6)) / S + 2
     text(d, (M, ly + 11), "Numbered pins = cards 1-13 \u00b7 dots = briefs 14-42", font(SANS, 7.6), MUTED)
-    # date check box
+    # date check box: green, says plainly that older stories are NOT on the page
     dy = by + 225
-    rect(d, (M, dy, M + mw, H - 30), fill=(252, 232, 232), outline=(214, 150, 150))
-    rect(d, (M, dy, M + 3, H - 30), fill=RED)
-    text(d, (M + 8, dy + 5), "DATE CHECK", font(SANS_B, 8.6), RED)
-    yy = dy + 17
+    GREEN = (22, 120, 60)
+    rect(d, (M, dy, M + mw, H - 30), fill=(228, 244, 232), outline=(140, 196, 156))
+    rect(d, (M, dy, M + 3, H - 30), fill=GREEN)
+    # green tick drawn as two strokes (Segoe UI has no check-mark glyph)
+    d.line([((M + 9) * S, (dy + 10) * S), ((M + 12) * S, (dy + 13.5) * S), ((M + 18) * S, (dy + 6) * S)],
+           fill=GREEN, width=2 * S)
+    text(d, (M + 22, dy + 5), DATE_HEAD, font(SANS_B, 9.0), GREEN)
+    yy = dy + 19
     for line in wrap(d, DATE_CHECK, font(SANS, 9.2), mw - 14):
         text(d, (M + 8, yy), line, font(SANS, 9.2))
         yy += 11.6
